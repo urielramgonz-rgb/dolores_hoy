@@ -46,5 +46,10 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
-# Claves y secretos
+# Secretos: JAMAS al repositorio
 secrets.json
+*.env
+.env*
+*.jks
+*.keystore
+key.properties
