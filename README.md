@@ -32,25 +32,32 @@ Todo esto siguiendo buenas prácticas de seguridad: HTTPS obligatorio, claves fu
 
 ## Pruebas y validación
 
-Ejecuta la suite completa:
+Ejecuta la suite completa desde la raíz del proyecto:
 
-flutter test
+```powershell
+flutter test --no-pub --reporter expanded
+```
 
-La app debe pasar todas las pruebas sin depender de internet real. Las pruebas están diseñadas para simular respuestas con `MockClient` y verificar que cada servicio se comporte correctamente.
+Las pruebas usan `MockClient`, así que no necesitan conectarse a las APIs ni consumir la cuota de NASA. En la ejecución registrada pasaron **28 pruebas**.
 
-## Evidencias recomendadas para entregar
+### Cobertura actual
 
-Aunque el documento no exige capturas como requisito obligatorio, sí es recomendable dejar evidencia visual del funcionamiento.
+| Archivo | Qué comprueba |
+| --- | --- |
+| `test/cliente_seguro_test.dart` | HTTPS obligatorio, cabeceras, errores HTTP, falta de conexión, timeout, límite de tamaño, JSON inválido y ocultamiento de claves en URL. |
+| `test/servicios_test.dart` | Conversión y validación para Open-Meteo, Frankfurter y Nager.Date. |
+| `test/seguridad_test.dart` | Protección de la clave NASA, mensajes de error seguros y aceptación exclusiva de imágenes HTTPS. |
+| `test/tablero_viewmodel_test.dart` | Carga simulada de las cinco APIs y aislamiento cuando falla una de ellas. |
 
-### Capturas sugeridas (opcionales)
-- pantalla principal con las 5 tarjetas cargadas
-- pantalla mostrando una tarjeta de error por API caída
-- pantalla con el refresco (`RefreshIndicator`) funcionando
+El manual propone probar cada API con respuestas simuladas y centralizar las defensas en `ClienteSeguro`; el proyecto sigue ese enfoque. La cobertura de servicios individual todavía no incluye pruebas dedicadas para Wikipedia y NASA: ambas aparecen en la prueba integrada del tablero.
 
-### Evidencias de pruebas
-- salida de `flutter test` en verde
-- captura del resultado final de la suite
-- si se entrega en equipo, incluir una captura del árbol de archivos y la configuración de secretos
+### Capturas de la actividad
+
+Las capturas muestran la salida real de la suite de pruebas; el registro de texto completo también está guardado en `captures/pruebas_flutter.txt`.
+
+![Ejecución completa de las pruebas Flutter](./captures/pruebas_flutter.png)
+
+![Resultados de seguridad y tolerancia a fallos](./captures/seguridad_resiliencia.png)
 
 ### Verificación de seguridad
 - `secrets.json` debe mantenerse fuera del repositorio
@@ -66,6 +73,7 @@ Aunque el documento no exige capturas como requisito obligatorio, sí es recomen
 - `lib/presentacion/tablero_viewmodel.dart` — estado y carga paralela de las cinco APIs
 - `lib/presentacion/pantalla_tablero.dart` — interfaz del tablero
 - `test/cliente_seguro_test.dart` — pruebas del cliente seguro
+- `test/servicios_test.dart` — pruebas unitarias de servicios de API
 - `test/seguridad_test.dart` — pruebas de seguridad
 - `test/tablero_viewmodel_test.dart` — pruebas del tablero
 - `secrets.json` — valores locales de la clave (ignorado por Git)
