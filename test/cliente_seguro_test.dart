@@ -54,7 +54,7 @@ void main() {
   });
 
   test('500 lanza ErrorServidorException con el código', () {
-    final c = seguro((_) async => jsonOk({}, 500);
+    final c = seguro((_) async => jsonOk({}, 500));
     expect(
       c.obtenerJson(https),
       throwsA(isA<ErrorServidorException>().having(

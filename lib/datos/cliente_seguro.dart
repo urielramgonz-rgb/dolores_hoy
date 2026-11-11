@@ -53,10 +53,20 @@ class ClienteSeguro {
   /// Versión de la URL segura para escribir en logs: oculta claves.
   static String redactar(Uri uri) {
     const secretos = {'api_key', 'apikey', 'key', 'token', 'access_token'};
-    final params = uri.queryParameters.map(
-      (k, v) => MapEntry(k, secretos.contains(k.toLowerCase()) ? '***' : v),
-    );
-    return uri.replace(queryParameters: params.isEmpty ? null : params).toString();
+
+    final query = uri.queryParametersAll.entries.expand((entry) {
+      final key = entry.key;
+      final isSecretKey = secretos.contains(key.toLowerCase());
+
+      return entry.value.map((value) {
+        final valor = isSecretKey ? '***' : value;
+        final encodedValue = isSecretKey ? valor : Uri.encodeComponent(valor);
+        return '${Uri.encodeComponent(key)}=$encodedValue';
+      });
+    }).join('&');
+
+    if (query.isEmpty) return uri.replace(query: null).toString();
+    return uri.replace(query: query).toString();
   }
 }
  

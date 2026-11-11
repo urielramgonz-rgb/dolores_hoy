@@ -101,3 +101,50 @@ class ServicioFestivos {
     return futuros.take(cuantos).toList();
   }
 }
+
+/// API 4 · Wikipedia en español (resumen de un tema, sin clave).
+/// Recibe TEXTO del usuario: por eso se valida y se codifica.
+class ServicioWikipedia {
+  final ClienteSeguro _c;
+
+  ServicioWikipedia(this._c);
+
+  static String normalizarTema(String tema) {
+    final t = tema.trim();
+    if (t.isEmpty) throw const EntradaInvalidaException('escribe un tema');
+    if (t.length > 80) throw const EntradaInvalidaException('tema demasiado largo');
+    if (t.contains(RegExp(r'[\x00-\x1F]'))) {
+      throw const EntradaInvalidaException('caracteres no permitidos');
+    }
+    return t.replaceAll(' ', '_');
+  }
+
+  Future<ResumenWiki> resumen(String tema) async {
+    final t = normalizarTema(tema);
+    final uri = Uri(
+      scheme: 'https',
+      host: 'es.wikipedia.org',
+      pathSegments: ['api', 'rest_v1', 'page', 'summary', t],
+    );
+    final json = await _c.obtenerJson(uri);
+    return convertir(() => ResumenWiki.desdeJson(json as Map<String, dynamic>));
+  }
+}
+
+/// API 5 · NASA APOD (foto astronómica del día, CON clave)
+class ServicioNasa {
+  final ClienteSeguro _c;
+  final ConfigClaves _claves;
+
+  ServicioNasa(this._c, this._claves);
+
+  Future<FotoAstronomica> fotoDelDia() async {
+    _claves.validar();
+    final json = await _c.obtenerJson(
+      Uri.https('api.nasa.gov', '/planetary/apod', {
+        'api_key': _claves.nasa,
+      }),
+    );
+    return convertir(() => FotoAstronomica.desdeJson(json as Map<String, dynamic>));
+  }
+}

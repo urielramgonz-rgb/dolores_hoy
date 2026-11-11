@@ -55,16 +55,47 @@ class TipoCambio {
   double pesosPorUnidad(String moneda) => 1 / tasas[moneda]!;
 }
 
-
 class Festivo {
   final DateTime fecha;
   final String nombre;
 
   const Festivo(this.fecha, this.nombre);
 
-  factory Festivo.desdeJson(Map<String, dynamic> json) =>
-      Festivo(
+  factory Festivo.desdeJson(Map<String, dynamic> json) => Festivo(
         DateTime.parse(json['date'] as String),
         json['localName'] as String,
+      );
+}
+
+class ResumenWiki {
+  final String titulo;
+  final String extracto;
+  final String? urlImagen;
+
+  const ResumenWiki(this.titulo, this.extracto, this.urlImagen);
+
+  factory ResumenWiki.desdeJson(Map<String, dynamic> json) {
+    final miniatura = json['thumbnail'] as Map<String, dynamic>?;
+    return ResumenWiki(
+      json['title'] as String,
+      json['extract'] as String,
+      soloHttps(miniatura?['source']),
+    );
+  }
+}
+
+class FotoAstronomica {
+  final String titulo;
+  final String explicacion;
+  final DateTime fecha;
+  final String? urlImagen;
+
+  const FotoAstronomica(this.titulo, this.explicacion, this.fecha, this.urlImagen);
+
+  factory FotoAstronomica.desdeJson(Map<String, dynamic> json) => FotoAstronomica(
+        json['title'] as String,
+        json['explanation'] as String,
+        DateTime.parse(json['date'] as String),
+        json['media_type'] == 'image' ? soloHttps(json['url']) : null,
       );
 }
